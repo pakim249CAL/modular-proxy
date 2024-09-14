@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
 import {EnumerableSet} from "@openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 
-import {AccessControlLib, AccessControlStorage} from "src/modules/access/access_control/AccessControlLib.sol";
+import {AccessControlLib, AccessControlStorage} from "src/modules/access/AccessControlLib.sol";
 
 contract AccessControlLibTest is Test {
     using AccessControlLib for bytes32;

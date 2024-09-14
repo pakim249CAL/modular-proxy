@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.26;
 
 import {Test} from "forge-std/Test.sol";
 
-import {MultiFacetProxyStorage as S} from "src/proxy/libraries/MultiFacetProxyStorage.sol";
-import {MultiFacetProxyLib as L} from "src/proxy/libraries/MultiFacetProxyLib.sol";
+import {ModularProxyStorage as S, ModularProxyLib as L} from "src/proxy/libraries/ModularProxyLib.sol";
 
-import {MultiFacetProxyGetters} from "src/proxy/facets/MultiFacetProxyGetters.sol";
+import {ModularProxyGetters} from "src/proxy/facets/ModularProxyGetters.sol";
 
-import {MultiFacetProxy} from "src/proxy/MultiFacetProxy.sol";
+import {ModularProxy} from "src/proxy/ModularProxy.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
@@ -16,6 +15,7 @@ contract ProxyTest is Test {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function testAddFunctionFailsIfSelectorAlreadyRegistered(address facet, bytes4 selector) public {
+        vm.assume(facet != address(0));
         L.setFunction(facet, selector);
 
         vm.expectRevert("MultiFacetProxyLib: selector to add is already registered");
@@ -28,6 +28,7 @@ contract ProxyTest is Test {
     }
 
     function testReplaceFunctionFailsIfSelectorNotRegistered(address facet, bytes4 selector) public {
+        vm.assume(facet != address(0));
         vm.expectRevert("MultiFacetProxyLib: selector to replace is not registered");
         L.replaceFunction(facet, selector);
     }
@@ -61,7 +62,7 @@ contract ProxyTest is Test {
     }
 
     function testDeployAndCalls() public {
-        MultiFacetProxyGetters getters = new MultiFacetProxyGetters();
+        ModularProxyGetters getters = new ModularProxyGetters();
 
         L.SelectorMapping[] memory selectorMappings = new L.SelectorMapping[](1);
         bytes4[] memory selectors = new bytes4[](2);
@@ -70,15 +71,15 @@ contract ProxyTest is Test {
 
         selectorMappings[0] = L.SelectorMapping(address(getters), selectors);
 
-        address proxy = address(new MultiFacetProxy(selectorMappings, address(0), ""));
+        address proxy = address(new ModularProxy(selectorMappings, address(0), ""));
 
-        assertEq(MultiFacetProxyGetters(proxy).getFacet(getters.getFacet.selector), address(getters));
-        assertEq(MultiFacetProxyGetters(proxy).getFacet(getters.getAllSelectors.selector), address(getters));
-        assertEq(MultiFacetProxyGetters(proxy).getAllSelectors().length, 2);
+        assertEq(ModularProxyGetters(proxy).getFacet(getters.getFacet.selector), address(getters));
+        assertEq(ModularProxyGetters(proxy).getFacet(getters.getAllSelectors.selector), address(getters));
+        assertEq(ModularProxyGetters(proxy).getAllSelectors().length, 2);
     }
 
     function testDeployWithInit() public {
-        MultiFacetProxyGetters getters = new MultiFacetProxyGetters();
+        ModularProxyGetters getters = new ModularProxyGetters();
         TestInit init = new TestInit();
 
         L.SelectorMapping[] memory selectorMappings = new L.SelectorMapping[](1);
@@ -88,9 +89,9 @@ contract ProxyTest is Test {
 
         selectorMappings[0] = L.SelectorMapping(address(getters), selectors);
 
-        address proxy = address(new MultiFacetProxy(selectorMappings, address(init), abi.encodeCall(TestInit.init, ())));
+        address proxy = address(new ModularProxy(selectorMappings, address(init), abi.encodeCall(TestInit.init, ())));
 
-        assertEq(MultiFacetProxyGetters(proxy).getFacet(bytes4(0)), address(1));
+        assertEq(ModularProxyGetters(proxy).getFacet(bytes4(0)), address(1));
     }
 
     function testCannotInitTwice() public {
@@ -100,7 +101,7 @@ contract ProxyTest is Test {
         bytes4[] memory selectors = new bytes4[](1);
         selectors[0] = init.init.selector;
         selectorMappings[0] = L.SelectorMapping(address(init), selectors);
-        address proxy = address(new MultiFacetProxy(selectorMappings, address(0), ""));
+        address proxy = address(new ModularProxy(selectorMappings, address(0), ""));
         TestInit(proxy).init();
 
         vm.expectRevert(abi.encodeWithSelector(TestInit.AlreadyInitialized.selector, address(init)));

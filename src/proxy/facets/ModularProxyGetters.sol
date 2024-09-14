@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {MultiFacetProxyStorage as S} from "src/proxy/libraries/MultiFacetProxyStorage.sol";
-import {IMultiFacetProxyGetters} from "src/proxy/facets/IMultiFacetProxyGetters.sol";
+import {ModularProxyStorage as S} from "src/proxy/libraries/ModularProxyLib.sol";
+import {IModularProxyGetters} from "src/proxy/facets/IModularProxyGetters.sol";
 
 import {EnumerableSet} from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /// TODO: When the TSTORE and TLOAD opcodes are available, add support for IDiamondLoupe
-contract MultiFacetProxyGetters is IMultiFacetProxyGetters {
+contract ModularProxyGetters is IModularProxyGetters {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     /// @notice Returns all selectors registered in the proxy. Meant for off-chain use, as it is not gas efficient.

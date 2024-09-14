@@ -1,27 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {MultiFacetProxyStorage} from "src/proxy/libraries/MultiFacetProxyStorage.sol";
-
-import {MultiFacetProxyLib} from "src/proxy/libraries/MultiFacetProxyLib.sol";
+import {ModularProxyStorage, ModularProxyLib} from "src/proxy/libraries/ModularProxyLib.sol";
 import {Proxy} from "@openzeppelin/contracts/proxy/Proxy.sol";
 
 /// @notice This proxy maintains a mapping of function selectors to their respective implementations.
 ///         The fallback is modified to forward delegate calls based on this mapping.
-contract MultiFacetProxy is Proxy {
+contract ModularProxy is Proxy {
     error FunctionNotFound(bytes4 selector);
 
-    /// @notice Populates the MultiFacetProxy with the given selector mappings and optionally calls an init function
+    /// @notice Populates the ModularProxy with the given selector mappings and optionally calls an init function
     /// @param selectorMappings Array of SelectorMapping structs
     /// @param init If non-zero, this address will be delegate called with initData on construction
     /// @param initData The calldata for the delegate call to init
-    constructor(MultiFacetProxyLib.SelectorMapping[] memory selectorMappings, address init, bytes memory initData)
+    constructor(ModularProxyLib.SelectorMapping[] memory selectorMappings, address init, bytes memory initData)
         payable
     {
-        MultiFacetProxyLib.addFunctions(selectorMappings);
+        ModularProxyLib.addFunctions(selectorMappings);
 
         // Discards return data
-        if (init != address(0)) MultiFacetProxyLib.delegateCall(init, initData);
+        if (init != address(0)) ModularProxyLib.delegateCall(init, initData);
     }
 
     function _fallback() internal virtual override {
@@ -33,7 +31,7 @@ contract MultiFacetProxy is Proxy {
     }
 
     function _implementation() internal view virtual override returns (address) {
-        return MultiFacetProxyStorage.layout().selectorToFacet[msg.sig];
+        return ModularProxyStorage.layout().selectorToFacet[msg.sig];
     }
 
     receive() external payable {}

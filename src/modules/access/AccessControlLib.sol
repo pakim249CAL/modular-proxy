@@ -1,24 +1,21 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {EnumerableSet} from "@openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";y
+import {EnumerableSet} from "@openzeppelin-contracts/contracts/utils/structs/EnumerableSet.sol";
 
-/// @notice Storage layout for the AccessControlLib library following ERC-7201
 library AccessControlStorage {
-    string internal constant ACCESS_CONTROL_STORAGE_ID = "layer.n.access.control";
-    bytes32 internal constant ACCESS_CONTROL_STORAGE_POSITION = keccak256(
-        abi.encode(uint256(keccak256(abi.encodePacked(ACCESS_CONTROL_STORAGE_ID))) - 1)
-    ) & ~bytes32(uint256(0xff));
-
-    /// @custom:storage-location erc7201:layer.n.access.control.storage
     struct Layout {
         mapping(bytes32 => AccessControlLib.RoleData) roles;
     }
 
-    function layout() internal pure returns (Layout storage acs) {
-        bytes32 position = ACCESS_CONTROL_STORAGE_POSITION;
+    string internal constant STORAGE_ID = "modular.access.control.storage";
+    bytes32 internal constant STORAGE_POSITION =
+        keccak256(abi.encode(uint256(keccak256(abi.encodePacked(STORAGE_ID))) - 1)) & ~bytes32(uint256(0xff));
+
+    function layout() internal pure returns (Layout storage s) {
+        bytes32 position = STORAGE_POSITION;
         assembly {
-            acs.slot := position
+            s.slot := position
         }
     }
 }
